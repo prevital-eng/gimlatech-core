@@ -1,407 +1,482 @@
-/**
- * gimlatech-core.js
- * ספריית ליבה משותפת לכל אפליקציות GimlaTech
- * גרסה 1.0
- * https://prevital-eng.github.io/gimlatech-core/gimlatech-core.js
- */
+<!--
+================================================================
+  GimlaTech – כלי גוגל לוותיקים
+  © 2026 רויטל פלד / Revital Peled. All Rights Reserved.
+  יצרה: רויטל פלד | נבנה בסיוע Claude AI | 2026
+================================================================
+-->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GimlaTech – כלי גוגל</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://prevital-eng.github.io/gimlatech-core/gimlatech-core.js"></script>
+<style>
+:root {
+  --bg:#0f172a; --surface:#1e293b; --surface2:#273549;
+  --accent:#38bdf8; --accent2:#818cf8;
+  --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+  --wa:#25d366; --yellow:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Heebo',sans-serif;background:#0f172a !important;color:#f1f5f9 !important;min-height:100vh;}
+.page-wrap{display:flex;min-height:100vh;}
+.sidebar{display:none;}
+.app{width:100%;max-width:520px;min-height:100vh;display:flex;flex-direction:column;margin:0 auto;}
+@media(min-width:900px){
+  body{background:#070f1d;}
+  .page-wrap{align-items:stretch;justify-content:center;}
+  .sidebar{display:flex;flex-direction:column;justify-content:center;width:340px;flex-shrink:0;padding:48px 40px;background:linear-gradient(160deg,#0f1e35 0%,#0a1628 100%);border-left:1px solid #1e3a5f;}
+  .sidebar-logo{font-size:32px;font-weight:900;margin-bottom:8px;}
+  .sidebar-logo span{color:var(--accent);}
+  .sidebar-tag{display:inline-block;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:var(--accent);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:28px;}
+  .sidebar-desc{font-size:15px;color:#94a3b8;line-height:1.8;margin-bottom:32px;}
+  .sidebar-steps{display:flex;flex-direction:column;gap:14px;}
+  .sidebar-step{display:flex;align-items:center;gap:12px;}
+  .sidebar-step-num{width:28px;height:28px;border-radius:50%;background:rgba(56,189,248,0.15);border:1.5px solid rgba(56,189,248,0.4);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .sidebar-step-text{font-size:13px;color:#64748b;}
+  .app{max-width:480px;flex-shrink:0;border-right:1px solid #1e293b;border-left:1px solid #1e293b;background:var(--bg);}
+}
+.header{padding:22px 18px 18px;background:linear-gradient(180deg,#0f172a 0%,transparent 100%);position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);text-align:center;}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;}
+.logo-text{font-size:22px;font-weight:900;letter-spacing:-0.5px;}
+.logo-text span{color:var(--accent);}
+.page-title{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-0.5px;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);}
+.copy-link{position:absolute;top:22px;left:16px;font-size:10px;color:#1e3a5f;font-weight:500;cursor:pointer;background:none;border:none;font-family:'Heebo',sans-serif;}
+.body{flex:1;padding:16px 16px 100px;}
+.search-wrap{background:var(--surface);border:2px solid var(--border);border-radius:18px;display:flex;align-items:center;padding:0 6px 0 14px;margin-bottom:16px;transition:border-color 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+.search-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.12);}
+.search-wrap input{flex:1;background:none;border:none;outline:none;font-size:16px;font-family:'Heebo',sans-serif;color:var(--text);padding:15px 4px;direction:rtl;-webkit-appearance:none;min-width:0;}
+.search-wrap input::placeholder{color:var(--muted);}
+.search-clear{background:none;border:none;color:var(--muted);font-size:17px;cursor:pointer;padding:6px;line-height:1;flex-shrink:0;display:none;-webkit-tap-highlight-color:transparent;}
+.search-clear.show{display:block;}
+.search-go{background:var(--accent);border:none;border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;transition:background 0.15s;-webkit-tap-highlight-color:transparent;margin-right:2px;}
+.search-go:hover{background:#7dd3fc;}
+.search-go:disabled{background:var(--border);cursor:default;}
+.search-hint-text{text-align:center;padding:20px 10px;color:var(--muted);font-size:14px;line-height:1.7;}
+.search-hint-text strong{color:var(--accent);}
+.chips-section{display:none;animation:fadeUp 0.2s ease;}
+.chips-section.show{display:block;}
+.chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:10px;font-family:'Heebo',sans-serif;text-align:right;direction:rtl;-webkit-tap-highlight-color:transparent;}
+.chip:active,.chip.active{border-color:var(--accent);background:var(--surface2);box-shadow:0 4px 16px rgba(56,189,248,0.15);}
+.chip-icon{font-size:1.3rem;flex-shrink:0;}
+.chip-texts{display:flex;flex-direction:column;flex:1;}
+.chip-name{font-size:13px;font-weight:700;color:var(--text);}
+.chip-tag{font-size:11px;color:var(--muted);}
+.ai-result{background:linear-gradient(135deg,#0c2340 0%,#1a1040 100%);border:1.5px solid rgba(56,189,248,0.3);border-radius:16px;padding:16px;margin-bottom:14px;display:none;animation:fadeUp 0.22s ease;position:relative;overflow:hidden;}
+.ai-result::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(56,189,248,0.1) 0%,transparent 70%);pointer-events:none;}
+.ai-result.show{display:block;}
+.ai-result-badge{background:var(--accent);color:#0f172a;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.ai-result-text{font-size:14px;line-height:1.75;color:#cbd5e1;white-space:pre-wrap;}
+.ai-result-copy{width:100%;margin-top:12px;padding:10px;border-radius:12px;background:var(--surface);border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif;display:none;}
+.ai-result-copy.show{display:block;}
+.detail-panel{display:none;margin:8px 0 0;background:linear-gradient(135deg,#0c2340 0%,#1a1040 100%);border:1.5px solid rgba(129,140,248,0.35);border-radius:16px;overflow:hidden;animation:fadeUp 0.22s ease;position:relative;}
+.detail-panel::before{content:'';position:absolute;top:0;right:0;width:130px;height:130px;background:radial-gradient(circle,rgba(129,140,248,0.12) 0%,transparent 70%);pointer-events:none;}
+.detail-panel.open{display:block;}
+.panel-header{padding:14px 16px 11px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.panel-icon{font-size:1.8rem;}
+.panel-title{font-size:17px;font-weight:900;color:var(--accent);}
+.panel-sub{font-size:11px;color:var(--muted);}
+.what-section{background:rgba(56,189,248,0.06);border-right:3px solid var(--accent);margin:12px 14px 0;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.7;color:#cbd5e1;}
+.what-label{font-weight:700;color:var(--accent);font-size:11px;margin-bottom:4px;display:block;}
+.inner-tabs{display:flex;margin:12px 14px 0;border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--border);}
+.inner-tab{flex:1;padding:9px 6px;background:transparent;border:none;font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:1px solid var(--border);}
+.inner-tab:last-child{border-left:none;}
+.inner-tab.active{background:var(--accent2);color:white;}
+.inner-section{display:none;}
+.inner-section.active{display:block;}
+.steps-title{font-size:12px;font-weight:700;color:var(--muted);padding:11px 16px 5px;text-transform:uppercase;letter-spacing:0.5px;}
+.steps-list{padding:0 14px 4px;list-style:none;}
+.steps-list li{display:flex;gap:11px;align-items:flex-start;padding:9px 12px;margin-bottom:7px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;font-size:13px;line-height:1.6;color:#cbd5e1;}
+.step-num{min-width:24px;height:24px;background:var(--accent2);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:2px;}
+.faq-list{padding:8px 14px 4px;}
+.faq-item{margin-bottom:7px;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.faq-q{width:100%;text-align:right;background:rgba(255,255,255,0.04);border:none;padding:11px 13px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent;}
+.faq-arrow{font-size:10px;color:var(--muted);transition:transform 0.2s;flex-shrink:0;}
+.faq-q.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{display:none;padding:10px 13px 12px;font-size:13px;line-height:1.65;color:#94a3b8;border-top:1px solid var(--border);background:rgba(0,0,0,0.15);}
+.faq-a.open{display:block;}
+.tip-box{background:rgba(251,191,36,0.08);border-right:3px solid var(--yellow);border-radius:10px;padding:10px 13px;margin:10px 14px 12px;font-size:13px;color:#fde68a;line-height:1.6;}
+.tip-label{font-weight:700;}
+.open-btn{display:block;margin:0 14px 16px;background:var(--accent);color:#0f172a;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:900;font-family:'Heebo',sans-serif;cursor:pointer;text-align:center;text-decoration:none;}
+.ai-loading{display:flex;gap:6px;align-items:center;padding:4px 0;}
+.ai-loading span{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounce 1.2s infinite;}
+.ai-loading span:nth-child(2){animation-delay:0.2s;}
+.ai-loading span:nth-child(3){animation-delay:0.4s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.wa-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:rgba(15,23,42,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:9px 16px;z-index:20;}
+.wa-inner{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.wa-label{font-size:12px;color:var(--muted);}
+.wa-btn{display:flex;align-items:center;gap:6px;background:var(--wa);color:white;text-decoration:none;padding:8px 15px;border-radius:20px;font-weight:700;font-size:13px;font-family:'Heebo',sans-serif;white-space:nowrap;flex-shrink:0;}
+#gt-footer .gt-footer{background:transparent;border-top:none;color:#475569;padding:8px 18px;}
+#gt-footer .gt-footer a{color:#38bdf8;}
+.footer-rights{background:#0c1a2e;border-top:1px solid #1e3a5f;padding:7px 18px;text-align:center;font-size:11px;color:var(--accent);letter-spacing:0.3px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
+.modal-box{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:520px;border-top:1px solid var(--border);max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:17px;font-weight:900;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.modal-cancel{width:100%;padding:11px;border-radius:12px;background:none;border:1.5px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;font-family:'Heebo',sans-serif;margin-top:10px;}
+.hidden{display:none!important;}
+</style>
+</head>
+<body class="gt-dark">
+<div class="page-wrap">
 
-// ===== הגדרות ברירת מחדל =====
-const GT_DEFAULTS = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbziw5JD4UTjz4idl45Xwf5EnUuB_NVnI0JUUibOd2XefAFn9kdISJVKkP46_ZirHeez/exec",
-  model: "gemini-2.0-flash-lite",
-  logoUrl: "https://prevital-eng.github.io/GT-GDSH/logo.png",
-  matbLogoUrl: "", // יש להגדיר כשיתקבל אישור
-  whatsapp: "972503960685",
-  colors: {
-    primary: "#1a5276",
-    secondary: "#2980b9",
-    accent: "#f39c12",
-    background: "#eaf4fb",
-    surface: "#ffffff",
-    text: "#1a252f"
-  }
+<div class="sidebar">
+  <div class="sidebar-logo">Gimla<span>Tech</span></div>
+  <div class="sidebar-tag">🌐 כלי גוגל לוותיקים</div>
+  <div class="sidebar-desc">הקלידו שאלה חופשית בכל שפה, או כתבו "כלי גוגל" לרשימת כל הכלים.</div>
+  <div class="sidebar-steps">
+    <div class="sidebar-step"><div class="sidebar-step-num">1</div><div class="sidebar-step-text">הקלידו שאלה או "כלי גוגל"</div></div>
+    <div class="sidebar-step"><div class="sidebar-step-num">2</div><div class="sidebar-step-text">קבלו תשובה מיידית</div></div>
+    <div class="sidebar-step"><div class="sidebar-step-num">3</div><div class="sidebar-step-text">לחצו על כלי לפירוט מלא</div></div>
+  </div>
+  <div style="margin-top:auto;padding-top:40px;font-size:11px;color:#334155;line-height:1.7">© 2026 רויטל פלד<br><span style="color:#1e3a5f">נבנה בסיוע Claude AI</span></div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER — מקורי + מקום ללוגו מט"ב -->
+  <div class="header">
+    <button class="copy-link" onclick="document.getElementById('about-modal').classList.remove('hidden')">© Revital Peled 2026</button>
+    <a href="https://prevital-eng.github.io/GTDH/gimlatech-home.html" style="position:absolute;top:22px;right:16px;font-size:11px;color:var(--accent);font-weight:600;text-decoration:none;">🏠 דף הבית</a>
+    <div class="logo-row">
+      <img src="https://prevital-eng.github.io/GT-GDSH/logo.png"
+           style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #38bdf8"
+           alt="GimlaTech" onerror="this.style.display='none'">
+      <div class="logo-text">Gimla<span>Tech</span></div>
+      <!-- לוגו מט"ב — יוצג כשיתקבל אישור -->
+      <img id="matb-logo" src="" alt='מט"ב' style="display:none;height:38px;border-right:2px solid rgba(56,189,248,0.3);padding-right:10px;margin-right:4px">
+    </div>
+    <div class="page-title">כלי גוגל</div>
+    <div class="page-sub">מדריך + עוזר AI בכל שפה</div>
+  </div>
+
+  <div class="body">
+    <div class="search-wrap" style="position:relative;flex-wrap:wrap;">
+      <div style="position:relative;flex:1;display:flex;align-items:center;">
+        <div id="autocompleteOverlay" style="position:absolute;right:0;top:0;height:100%;display:flex;align-items:center;padding:0 4px;pointer-events:none;font-size:16px;font-family:'Heebo',sans-serif;white-space:nowrap;overflow:hidden;width:100%;"></div>
+        <input type="text" id="searchInput" placeholder='כתבו שאלה, או "כלי גוגל" לרשימה' autocomplete="off" autocorrect="off" spellcheck="false" style="position:relative;z-index:1;background:transparent;width:100%;">
+      </div>
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      <button class="search-go" id="searchGo" onclick="runSearch()" disabled>🔍</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin:-8px 0 12px;">💡 Tab לקבלת הצעה · Enter לחיפוש</div>
+
+    <div class="search-hint-text" id="hintText">
+      💡 כתבו <strong>"כלי גוגל"</strong> לרשימת כל הכלים<br>
+      או כתבו שאלה חופשית בעברית / English
+    </div>
+
+    <div class="chips-section show" id="chipsSection">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">📌 בחרו כלי לפירוט:</div>
+      <div class="chips-grid" id="chipsGrid"></div>
+    </div>
+
+    <div class="ai-result" id="aiResult">
+      <div class="ai-result-badge" id="aiBadge">✨ תשובה</div>
+      <div class="ai-result-text" id="aiResultText"></div>
+      <button class="ai-result-copy" id="aiResultCopy">📋 העתק תשובה</button>
+    </div>
+
+    <div class="detail-panel" id="detailPanel"></div>
+  </div>
+
+  <div class="wa-bar">
+    <div class="wa-inner">
+      <span class="wa-label">לעזרה נוספת – פנו לגימלאטק:</span>
+      <a href="https://wa.me/972503960685" target="_blank" class="wa-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        0503960685
+      </a>
+    </div>
+  </div>
+
+  <div id="gt-footer"></div>
+  <div class="footer-rights">🛡️ כלי זה מוגן בזכויות יוצרים &nbsp;|&nbsp; © Revital Peled 2026 &nbsp;|&nbsp; All Rights Reserved</div>
+
+  <div class="modal-overlay hidden" id="about-modal" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="modal-box">
+      <div class="modal-title">🌐 GimlaTech – כלי גוגל</div>
+      <div class="modal-sub">כלי הנגשה דיגיטלית לוותיקים</div>
+      <div style="background:#0f172a;border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;line-height:2">
+          <div style="color:#94a3b8;border-left:1px solid #1e293b;padding-left:12px">
+            <strong style="color:#38bdf8">יוצרת:</strong> רויטל פלד<br>
+            <strong style="color:#38bdf8">שנת יצירה:</strong> 2026<br>
+            <strong style="color:#38bdf8">נבנה בסיוע:</strong> Claude AI מבית Anthropic<br>
+            <strong style="color:#38bdf8">מטרה:</strong> הנגשת כלי גוגל לוותיקים
+          </div>
+          <div style="color:#64748b;text-align:left;direction:ltr;font-size:11px;line-height:2">
+            <strong style="color:#818cf8">Creator:</strong> Revital Peled<br>
+            <strong style="color:#818cf8">Year:</strong> 2026<br>
+            <strong style="color:#818cf8">Built with:</strong> Claude AI by Anthropic<br>
+            <strong style="color:#818cf8">Purpose:</strong> Google tools for seniors
+          </div>
+        </div>
+      </div>
+      <button class="modal-cancel" onclick="document.getElementById('about-modal').classList.add('hidden')">סגרו ✕</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+var APP_CONFIG = {
+  appName: 'כלי גוגל',
+  appSubtitle: 'מדריך + עוזר AI בכל שפה',
+  darkTheme: true,
+  // matbLogoUrl: '', // יש להסיר הערה כשיתקבל אישור מט"ב
 };
 
-// ===== הזרקת CSS גלובלי =====
-function gtInjectStyles() {
-  if (document.getElementById("gt-core-styles")) return;
-  const style = document.createElement("style");
-  style.id = "gt-core-styles";
-  style.textContent = `
-    :root {
-      --gt-primary: ${GT_DEFAULTS.colors.primary};
-      --gt-secondary: ${GT_DEFAULTS.colors.secondary};
-      --gt-accent: ${GT_DEFAULTS.colors.accent};
-      --gt-bg: ${GT_DEFAULTS.colors.background};
-      --gt-surface: ${GT_DEFAULTS.colors.surface};
-      --gt-text: ${GT_DEFAULTS.colors.text};
-      --gt-radius: 12px;
-      --gt-shadow: 0 2px 12px rgba(26,82,118,0.10);
-    }
+var tools = [
+  { id:'gmail',    icon:'✉️',  name:'Gmail',         tagline:'מיילים חינם',        url:'https://mail.google.com',
+    what:'Gmail היא תיבת דואר אלקטרוני (מייל) חינמית של גוגל. אפשר לשלוח ולקבל הודעות לכל אחד בעולם, בחינם לגמרי.',
+    steps:['פתחו את הדפדפן ועברו ל־gmail.com','היכנסו עם כתובת Gmail וסיסמה','לכתיבת מייל חדש – לחצו על ✏️ בפינה','כתבו כתובת הנמען, נושא ותוכן','לחצו "שלח" – המייל יגיע תוך שניות!'],
+    tip:'שכחתם סיסמה? לחצו "שכחתי סיסמה" וגוגל תעזור לאפס.',
+    faqs:[{q:'איך יוצרים חשבון Gmail חדש?',a:'עברו ל־gmail.com ולחצו "צרו חשבון". מלאו שם, בחרו כתובת וסיסמה.'},{q:'איך מחפשים מייל ישן?',a:'בראש המסך יש שורת חיפוש. כתבו שם השולח או מילה מהמייל.'},{q:'איך מעבירים מייל לאחר?',a:'פתחו המייל, לחצו "→ העבירו", כתבו כתובת הנמען ולחצו "שלח".'},{q:'מה זה תיקיית ספאם?',a:'מיילים לא רצויים שגוגל מסנן. אם פספסתם מייל חשוב – בדקו שם.'}] },
+  { id:'maps',     icon:'🗺️', name:'Google Maps',    tagline:'ניווט וכתובות',      url:'https://maps.google.com',
+    what:'Google Maps מראה מפות ומנווטת אתכם מכל מקום לכל מקום – כמו וייז, חינם.',
+    steps:['פתחו maps.google.com','הקלידו כתובת או שם המקום','לחצו "ניווט" (חץ כחול)','המפה תנחה אתכם','בסיום – לחצו "סיום ניווט"'],
+    tip:'רוצים שעות פתיחה של חנות? חפשו את שם העסק – הכל יופיע!',
+    faqs:[{q:'איך מחפשים תחנת אוטובוס קרובה?',a:'לחצו 🚌 בתפריט למטה, או חפשו "תחנת אוטובוס קרובה".'},{q:'אפשר לשמור כתובת הבית?',a:'לחצו על שם המקום, גללו למטה, לחצו "שמרו" → "בית".'},{q:'איך רואים פקקים?',a:'ירוק=פנוי, כתום=עומס, אדום=פקק. גוגל מציע מסלול עוקף.'},{q:'אפשר להשתמש ללא אינטרנט?',a:'כן! לחצו על שם האזור ובחרו "הורידו" לשמירה בטלפון.'}] },
+  { id:'youtube',  icon:'▶️',  name:'YouTube',        tagline:'סרטונים בחינם',      url:'https://youtube.com',
+    what:'YouTube הוא אתר הסרטונים הגדול בעולם – חדשות, בישול, שירים, יוגה, שיעורים – בחינם.',
+    steps:['פתחו youtube.com','הקלידו בשורת החיפוש מה שאתם מחפשים','לחצו על אחד מהסרטונים','הסרטון יתחיל – אפשר להשהות עם ⏸','לגדול? לחצו ⛶ מצד שמאל למטה'],
+    tip:'לחיצה על שם הערוץ מראה עוד סרטונים של אותו יוצר.',
+    faqs:[{q:'איך מגדילים כתוביות?',a:'לחצו ⚙️ בסרטון, "כתוביות" → "אפשרויות כתוביות" – הגדילו גופן.'},{q:'איך מאיטים סרטון?',a:'לחצו ⚙️, "מהירות הפעלה", בחרו 0.75 – ירוץ לאט יותר.'},{q:'איך שומרים סרטון לאחר כך?',a:'לחצו ⋮ ליד הסרטון, "שמרו לצפייה מאוחרת". תמצאו ב"ספרייה".'},{q:'למה פרסומות?',a:'YouTube בחינם = פרסומות. אחרי 5 שניות מופיע "דלגו" – לחצו.'}] },
+  { id:'translate',icon:'🌐', name:'תרגום גוגל',     tagline:'תרגום רגעי',          url:'https://translate.google.com',
+    what:'מתרגם מילים, משפטים ומסמכים שלמים בין יותר מ-100 שפות, בחינם.',
+    steps:['פתחו translate.google.com','שמאל: שפת המקור (למשל אנגלית)','ימין: שפת היעד (למשל עברית)','הקלידו מה שרוצים לתרגם','התרגום מופיע מיד! 🔊 לשמיעת הגייה'],
+    tip:'יש מסמך זר? לחצו "מסמכים" והעלו אותו – גוגל תתרגם הכל.',
+    faqs:[{q:'איך מתרגמים מתמונה?',a:'לחצו 📷, צלמו או העלו תמונה עם טקסט – גוגל יתרגם אוטומטית.'},{q:'אפשר לתרגם בדיבור?',a:'לחצו 🎤 ודברו – גוגל יתמלל ויתרגם מיד.'},{q:'התרגום לא מדויק?',a:'לבסיס – מצוין. לחוזים ומסמכים רפואיים – אמתו עם מתרגם אנושי.'},{q:'איך מתרגמים אתר שלם?',a:'ב-Chrome על אתר אנגלי מופיע "תרגמו דף זה" – לחצו עליו.'}] },
+  { id:'photos',   icon:'📷',  name:'Google Photos',  tagline:'גלריית תמונות',      url:'https://photos.google.com',
+    what:'Google Photos שומרת את כל תמונותיכם בענן – בטוחות, מסודרות, ונגישות מכל מכשיר.',
+    steps:['פתחו photos.google.com','לחצו "העלאה" להוסיף תמונות','התמונות יופיעו לפי תאריך','חיפוש: כתבו "חתונה" / "ילדים" / שם','לשתף: לחצו על תמונה → "שתף" ↗'],
+    tip:'גוגל מזהה פנים! חפשו שם נכד ותקבלו את כל התמונות שלו.',
+    faqs:[{q:'האם התמונות פרטיות?',a:'כן! רק אתם רואים אותן, אלא אם שיתפתם.'},{q:'כמה מקום יש בחינם?',a:'15 ג\'יגה – מספיק לאלפי תמונות.'},{q:'איך יוצרים אלבום?',a:'לחצו "+", "אלבום", תנו שם ובחרו תמונות. אפשר לשתף עם המשפחה.'},{q:'מחקתי תמונה בטעות?',a:'נשמרת בפח 60 יום: ספרייה → פח → שחזרו.'}] },
+  { id:'meet',     icon:'📹',  name:'Google Meet',    tagline:'שיחות וידאו',        url:'https://meet.google.com',
+    what:'שיחות וידאו חינמיות עם המשפחה והחברים – כמו פגישה פנים אל פנים, דרך המסך.',
+    steps:['פתחו meet.google.com','לחצו "שיחה חדשה"','שלחו את הקישור לבן/בת שרוצים לדבר','כשלוחצים על הקישור – נפגשים!','בסיום: כפתור אדום 📵 לניתוק'],
+    tip:'אין צורך להתקין כלום! Meet עובדת ישירות בדפדפן Chrome.',
+    faqs:[{q:'האם חינמי?',a:'כן! עד 100 משתתפים, ללא הגבלת זמן.'},{q:'לא שומעים אותי?',a:'בתחתית: מיקרופון 🎤. קו אדום = מושתק. לחצו להפעיל.'},{q:'איך מאפשרים מצלמה?',a:'Chrome יבקש רשות – לחצו "אפשרו". חסמתם? לחצו 🔒 בשורת הכתובת.'},{q:'אפשר מהטלפון?',a:'כן! הורידו אפליקציית Google Meet, הכניסו קישור – ואתם בשיחה.'}] },
+  { id:'drive',    icon:'💾',  name:'Google Drive',   tagline:'שמירת קבצים',        url:'https://drive.google.com',
+    what:'ארון קבצים דיגיטלי בענן. שומרים מסמכים, תמונות, טפסים – ומגיעים מכל מקום.',
+    steps:['פתחו drive.google.com','לחצו "+ חדש" ליצירת תיקייה/מסמך','גררו קובץ מהמחשב לתוך Drive','הכל נשמר אוטומטית!','לשתף: לחצן ימני על קובץ → "שיתוף"'],
+    tip:'15 ג\'יגה בחינם! מספיק לעשרות אלפי תמונות ומסמכים.',
+    faqs:[{q:'איך מעלים מהטלפון?',a:'ב-Drive לחצו "+", "העלאה", בחרו קובץ מהגלריה.'},{q:'האם עורכים יכולים לשנות?',a:'תלוי בהגדרות: "צופה בלבד" או "עורך". בחרו בחוכמה.'},{q:'איך מוצאים קובץ שאיבד?',a:'לחצו 🔍 ב-Drive, חפשו לפי שם. או "אחרונים" לקבצים אחרונים.'},{q:'אפשר לפתוח Word ב-Drive?',a:'כן! Drive פותח Word, Excel ו-PowerPoint ישירות.'}] },
+  { id:'search',   icon:'🔍',  name:'חיפוש גוגל',    tagline:'תשובות לכל שאלה',    url:'https://google.com',
+    what:'מנוע החיפוש הגדול בעולם. כל שאלה, כל מידע – כותבים ומיד מקבלים תשובה.',
+    steps:['פתחו google.com','לחצו על שורת החיפוש','כתבו השאלה בעברית: "תרופה לכאב ראש"','לחצו Enter','קראו תוצאות – הראשונות בדרך כלל הכי מדויקות'],
+    tip:'אפשר לדבר! לחצו 🎤 בשורת החיפוש ואמרו השאלה בקול.',
+    faqs:[{q:'איך מחפשים תמונות?',a:'אחרי החיפוש לחצו לשונית "תמונות" בראש הדף.'},{q:'איך מחפשים חדשות?',a:'לחצו "חדשות" אחרי החיפוש. סנן לפי "שעה אחרונה" וכו\'.'},{q:'איך יודעים שהמידע אמין?',a:'העדיפו עיתונים, משרדי ממשלה, בתי חולים.'},{q:'אפשר לחפש לפי תמונה?',a:'כן! לחצו 📷 בשורת החיפוש והעלו תמונה.'}] },
+  { id:'keep',     icon:'📝',  name:'Google Keep',    tagline:'פתקים ותזכורות',     url:'https://keep.google.com',
+    what:'לוח פתקים דיגיטלי. רשימות קניות, תזכורות, רעיונות – נשמרים אוטומטית.',
+    steps:['פתחו keep.google.com','לחצו "כתוב פתק..." לפתק חדש','כתבו – רשימה, תזכורת, מה שרוצים','נשמר אוטומטית! צבעו לארגון','להוספת תזכורת: לחצו 🔔 בפתק'],
+    tip:'Keep מסונכרן בין טלפון למחשב. כתבתם בבית – תראו בכל מקום!',
+    faqs:[{q:'איך יוצרים רשימת קניות עם ✓?',a:'לחצו "רשימה חדשה" (☑️). כל פריט עם תיבת סימון – כשקונים מסמנים ✓.'},{q:'איך מגדירים תזכורת?',a:'פתחו פתק, לחצו 🔔, בחרו תאריך ושעה – תקבלו התראה.'},{q:'איך מארגנים לפי נושא?',a:'לחצו ⋮ בפתק ובחרו צבע: ירוק=קניות, כחול=רפואה, צהוב=משפחה.'},{q:'אפשר לשתף פתק?',a:'לחצו 👤+ בתחתית הפתק, הכניסו כתובת Gmail – הם יראו ויוכלו לעדכן.'}] },
+  { id:'calendar', icon:'📅',  name:'יומן גוגל',      tagline:'ניהול זמן ופגישות',  url:'https://calendar.google.com',
+    what:'יומן דיגיטלי חינמי. שומרים תורים, פגישות, ימי הולדת – ומקבלים תזכורות אוטומטיות.',
+    steps:['פתחו calendar.google.com','לחצו "+ צרו" לאירוע חדש','כתבו שם, תאריך ושעה','הוסיפו תזכורת: 30 דקות לפני, יום לפני','לחצו "שמרו" – תקבלו התראה!'],
+    tip:'הזמינו בני משפחה לאירוע! לחצו "הוסיפו אורחים" והכניסו כתובת Gmail שלהם.',
+    faqs:[{q:'איך מוסיפים תור לרופא?',a:'לחצו "+ צרו", כתבו "תור לרופא", בחרו תאריך ושעה. הוסיפו תזכורת "יום אחד לפני".'},{q:'איך מגדירים אירוע חוזר (תרופה יומית)?',a:'צרו אירוע, בשדה "חזרה" בחרו "כל יום" – היומן ייצור את כל המועדים.'},{q:'האם מסונכרן עם הטלפון?',a:'כן! הורידו Google Calendar – מה שנכנס במחשב יופיע מיד בטלפון.'},{q:'איך משתפים יומן עם בן/בת זוג?',a:'לחצו ⋮ ליד שם היומן, "הגדרות ושיתוף", הכניסו כתובת Gmail.'},{q:'איך יוצרים יומן משפחתי משותף?',a:'calendar.google.com → לחצו + ליד "יומנים אחרים" → "צרו יומן חדש" → קראו לו "יומן משפחתי" → לחצו ⋮ ליד שמו → "הגדרות ושיתוף" → הוסיפו Gmail של כל בן משפחה ובחרו הרשאה → לחצו "שלחו". מעכשיו כל אירוע שתוסיפו ליומן המשפחתי ייראה לכולם!'}] }
+];
 
-    * { box-sizing: border-box; }
+var SYS = 'אתה עוזר דיגיטלי של גימלאטק לוותיקים בישראל, מומחה לכלי גוגל.\n' +
+  'כללים חשובים:\n' +
+  '1. ענה בשפת השאלה (עברית/אנגלית/רוסית/כל שפה אחרת).\n' +
+  '2. קרא את השאלה בעיון – ענה בדיוק על מה שנשאל.\n' +
+  '3. שפה פשוטה, משפטים קצרים, מספר שלבים ברורים.\n' +
+  '4. אם מונח טכני הכרחי – הסבר אותו מיד בסוגריים.\n' +
+  '5. בסוף הוסף שורה: גימלאטק לעזרה: 050-3960685';
 
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--gt-bg);
-      color: var(--gt-text);
-      direction: rtl;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-    }
-
-    /* עיצוב כהה — מופעל כשהאפליקציה מגדירה darkTheme: true */
-    body.gt-dark {
-      background: #0f172a;
-      color: #f1f5f9;
-      --bg:#0f172a; --surface:#1e293b; --surface2:#273549;
-      --accent:#38bdf8; --accent2:#818cf8;
-      --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
-      --wa:#25d366; --yellow:#fbbf24;
-    }
-
-    /* ===== כותרת ===== */
-    .gt-header {
-      background: var(--gt-primary);
-      color: white;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-    }
-
-    .gt-header-logos {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .gt-logo {
-      height: 44px;
-      width: auto;
-    }
-
-    /* לוגו מט"ב — מוסתר עד לאישור */
-    .gt-matb-logo {
-      height: 38px;
-      width: auto;
-      display: none; /* יוצג כשיתקבל אישור: style="display:block" */
-      opacity: 0.92;
-      border-right: 2px solid rgba(255,255,255,0.3);
-      padding-right: 12px;
-    }
-
-    .gt-header-title {
-      flex: 1;
-      text-align: center;
-    }
-
-    .gt-header-title h1 {
-      margin: 0;
-      font-size: 1.2rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .gt-header-title p {
-      margin: 2px 0 0;
-      font-size: 0.8rem;
-      opacity: 0.85;
-    }
-
-    /* ===== גוף ===== */
-    .gt-container {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    /* ===== כרטיס ===== */
-    .gt-card {
-      background: var(--gt-surface);
-      border-radius: var(--gt-radius);
-      box-shadow: var(--gt-shadow);
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    /* ===== כפתורים ===== */
-    .gt-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.18s, transform 0.12s;
-      font-family: inherit;
-    }
-
-    .gt-btn:active { transform: scale(0.97); }
-
-    .gt-btn-primary {
-      background: var(--gt-secondary);
-      color: white;
-    }
-    .gt-btn-primary:hover { background: var(--gt-primary); }
-
-    .gt-btn-copy {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #c8e6c9;
-      font-size: 0.85rem;
-      padding: 7px 14px;
-    }
-    .gt-btn-copy:hover { background: #c8e6c9; }
-    .gt-btn-copy.copied {
-      background: #c8e6c9;
-      color: #1b5e20;
-    }
-
-    .gt-btn-whatsapp {
-      background: #25d366;
-      color: white;
-    }
-    .gt-btn-whatsapp:hover { background: #128c7e; }
-
-    /* ===== שדה טקסט ===== */
-    .gt-textarea {
-      width: 100%;
-      border: 1.5px solid #b0c4de;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      direction: rtl;
-      resize: vertical;
-      min-height: 80px;
-      background: #f8fbff;
-      color: var(--gt-text);
-      transition: border 0.18s;
-    }
-    .gt-textarea:focus {
-      outline: none;
-      border-color: var(--gt-secondary);
-      background: white;
-    }
-
-    /* ===== תשובת AI ===== */
-    .gt-response {
-      background: #f0f7ff;
-      border-right: 4px solid var(--gt-secondary);
-      border-radius: 0 var(--gt-radius) var(--gt-radius) 0;
-      padding: 14px 16px;
-      margin-top: 12px;
-      line-height: 1.7;
-      font-size: 0.97rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .gt-response-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .gt-response-label {
-      font-size: 0.8rem;
-      color: var(--gt-secondary);
-      font-weight: 600;
-    }
-
-    /* ===== טעינה ===== */
-    .gt-loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      color: var(--gt-secondary);
-      font-size: 0.95rem;
-    }
-
-    .gt-spinner {
-      display: inline-block;
-      width: 22px;
-      height: 22px;
-      border: 3px solid #b0c4de;
-      border-top-color: var(--gt-secondary);
-      border-radius: 50%;
-      animation: gt-spin 0.8s linear infinite;
-      vertical-align: middle;
-      margin-left: 8px;
-    }
-
-    @keyframes gt-spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* ===== שגיאה ===== */
-    .gt-error {
-      background: #fff3f3;
-      border: 1.5px solid #ffcdd2;
-      border-radius: 8px;
-      padding: 12px;
-      color: #c62828;
-      font-size: 0.9rem;
-      margin-top: 10px;
-      display: none;
-    }
-
-    /* ===== פוטר ===== */
-    .gt-footer {
-      text-align: center;
-      padding: 18px 16px;
-      color: #7f8c8d;
-      font-size: 0.82rem;
-      border-top: 1px solid #dde8f0;
-      margin-top: 20px;
-    }
-
-    .gt-footer a {
-      color: var(--gt-secondary);
-      text-decoration: none;
-    }
-
-    /* ===== רספונסיבי ===== */
-    @media (max-width: 480px) {
-      .gt-header { padding: 10px 12px; }
-      .gt-header-title h1 { font-size: 1rem; }
-      .gt-logo { height: 36px; }
-      .gt-container { padding: 10px; }
-    }
-  `;
-  document.head.appendChild(style);
+var ALL_KEYWORDS = ['כלי גוגל','כלים','google tools','רשימה','כל הכלים','הכל','all tools'];
+function isAllKeyword(q) {
+  var ql=q.trim().toLowerCase();
+  for(var i=0;i<ALL_KEYWORDS.length;i++) if(ql===ALL_KEYWORDS[i]||ql.indexOf(ALL_KEYWORDS[i])!==-1) return true;
+  return false;
 }
-
-// ===== בניית כותרת =====
-function gtRenderHeader(config) {
-  const header = document.getElementById("gt-header");
-  if (!header) return;
-
-  const matbLogoHtml = config.matbLogoUrl
-    ? `<img src="${config.matbLogoUrl}" alt="מט&quot;ב" class="gt-matb-logo" style="display:block">`
-    : `<img src="" alt="מט&quot;ב" class="gt-matb-logo">`; // מוסתר
-
-  header.innerHTML = `
-    <div class="gt-header-logos">
-      <img src="${config.logoUrl || GT_DEFAULTS.logoUrl}" alt="GimlaTech" class="gt-logo">
-      ${matbLogoHtml}
-    </div>
-    <div class="gt-header-title">
-      <h1>${config.appName || "GimlaTech"}</h1>
-      ${config.appSubtitle ? `<p>${config.appSubtitle}</p>` : ""}
-    </div>
-  `;
-}
-
-// ===== בניית פוטר =====
-function gtRenderFooter(config) {
-  const footer = document.getElementById("gt-footer");
-  if (!footer) return;
-
-  const whatsapp = config.whatsapp || GT_DEFAULTS.whatsapp;
-  footer.innerHTML = `
-    <div class="gt-footer">
-      <p>שאלות? נשמח לעזור 📱
-        <a href="https://wa.me/${whatsapp}" target="_blank">WhatsApp</a>
-      </p>
-      <p>© GimlaTech ${new Date().getFullYear()} — כלים דיגיטליים לגיל השלישי</p>
-    </div>
-  `;
-}
-
-// ===== קריאה ל-AI =====
-async function gtAskAI(userMessage, systemPrompt, config) {
-  const apiUrl = config.apiUrl || GT_DEFAULTS.apiUrl;
-  const model = config.model || GT_DEFAULTS.model;
-
-  const params = new URLSearchParams({
-    userMessage: userMessage,
-    systemPrompt: systemPrompt,
-    model: model
-  });
-
-  const response = await fetch(`${apiUrl}?${params.toString()}`, {
-    method: "GET"
-  });
-
-  if (!response.ok) throw new Error(`שגיאת שרת: ${response.status}`);
-
-  const data = await response.json();
-
-  // תמיכה במבנים שונים של תשובה
-  if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-    return data.candidates[0].content.parts[0].text;
+function findMatchingTool(q) {
+  var ql=q.trim().toLowerCase();
+  for(var i=0;i<tools.length;i++){
+    var t=tools[i];
+    if(ql===t.name.toLowerCase()) return t;
+    if(ql.indexOf(t.name.toLowerCase())!==-1) return t;
+    if((t.name+' '+t.tagline).toLowerCase().indexOf(ql)!==-1) return t;
   }
-  if (data.reply) return data.reply;
-  if (data.text) return data.text;
-
-  throw new Error("לא התקבלה תשובה מהשרת");
+  return null;
 }
 
-// ===== כפתור העתקה =====
-function gtCopyText(text, btnId) {
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    const original = btn.innerHTML;
-    btn.innerHTML = "✅ הועתק!";
-    btn.classList.add("copied");
-    setTimeout(() => {
-      btn.innerHTML = original;
-      btn.classList.remove("copied");
-    }, 2000);
-  });
+var autocompleteTimer=null, lastSuggestion='';
+var suggestions=['כלי גוגל'].concat(tools.map(function(t){return t.name;})).concat(['איך שולחים מייל?','איך מנווטים עם Maps?','איך מעלים תמונות?','איך יוצרים אירוע ביומן?']);
+function showSuggestion(inp,s){
+  if(!s||!inp.value){clearSuggestion();return;}
+  var ov=document.getElementById('autocompleteOverlay'),typed=inp.value;
+  if(s.toLowerCase().indexOf(typed.toLowerCase())===0){
+    ov.innerHTML='<span style="color:transparent">'+escH(typed)+'</span><span style="color:var(--muted);opacity:0.6">'+escH(s.slice(typed.length))+'</span>';
+    lastSuggestion=s;
+  }else clearSuggestion();
+}
+function clearSuggestion(){document.getElementById('autocompleteOverlay').innerHTML='';lastSuggestion='';}
+function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function acceptSuggestion(){
+  if(!lastSuggestion) return false;
+  var inp=document.getElementById('searchInput');
+  inp.value=lastSuggestion;clearSuggestion();
+  document.getElementById('searchGo').disabled=false;
+  document.getElementById('searchClear').className='search-clear show';
+  return true;
+}
+function getAutoSuggestion(typed){
+  if(!typed||typed.length<2) return '';
+  var tl=typed.toLowerCase();
+  for(var i=0;i<suggestions.length;i++) if(suggestions[i].toLowerCase().indexOf(tl)===0&&suggestions[i].length>typed.length) return suggestions[i];
+  return '';
 }
 
-// ===== הצגת תשובה =====
-function gtShowResponse(containerId, text, copyBtnId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
+var activeTool=null, activeInnerTab={};
 
-  const uniqueId = copyBtnId || ("copy-" + Date.now());
-
-  container.innerHTML = `
-    <div class="gt-response">
-      <div class="gt-response-header">
-        <span class="gt-response-label">✨ תשובת המסייע</span>
-        <button class="gt-btn gt-btn-copy" id="${uniqueId}"
-          onclick="gtCopyText(document.getElementById('${uniqueId}').closest('.gt-response').querySelector('.gt-response-text').innerText, '${uniqueId}')">
-          📋 העתק תשובה
-        </button>
-      </div>
-      <div class="gt-response-text">${text.replace(/\n/g, "<br>")}</div>
-    </div>
-  `;
-}
-
-// ===== הצגת/הסתרת טעינה =====
-function gtShowLoading(loadingId, show) {
-  const el = document.getElementById(loadingId);
-  if (el) el.style.display = show ? "block" : "none";
-}
-
-// ===== הצגת שגיאה =====
-function gtShowError(errorId, message) {
-  const el = document.getElementById(errorId);
-  if (!el) return;
-  el.textContent = message || "אירעה שגיאה. נסו שוב.";
-  el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; }, 5000);
-}
-
-// ===== אתחול אפליקציה =====
-function gtInit(config) {
+window.addEventListener('DOMContentLoaded',function(){
   gtInjectStyles();
-  if (config.darkTheme) document.body.classList.add('gt-dark');
-  gtRenderHeader(config);
-  gtRenderFooter(config);
+  gtRenderFooter(APP_CONFIG);
+
+  document.getElementById('chipsGrid').innerHTML=tools.map(function(t){
+    return '<button class="chip" id="chip-'+t.id+'" onclick="toggleTool(\''+t.id+'\')">'+
+      '<span class="chip-icon">'+t.icon+'</span>'+
+      '<span class="chip-texts"><span class="chip-name">'+t.name+'</span><span class="chip-tag">'+t.tagline+'</span></span></button>';
+  }).join('');
+
+  var inp=document.getElementById('searchInput'),goBtn=document.getElementById('searchGo'),clrBtn=document.getElementById('searchClear');
+  function onInput(){
+    var v=inp.value;
+    goBtn.disabled=v.trim().length<1;
+    clrBtn.className='search-clear'+(v.length?' show':'');
+    if(!v.trim()){document.getElementById('hintText').style.display='block';document.getElementById('chipsSection').className='chips-section';clearSuggestion();return;}
+    document.getElementById('hintText').style.display='none';
+    clearTimeout(autocompleteTimer);
+    autocompleteTimer=setTimeout(function(){showSuggestion(inp,getAutoSuggestion(v));},120);
+  }
+  inp.addEventListener('input',onInput);
+  inp.addEventListener('keyup',onInput);
+  inp.addEventListener('keydown',function(e){
+    if((e.key==='Tab'||e.key==='ArrowLeft')&&lastSuggestion){e.preventDefault();acceptSuggestion();return;}
+    if(e.key==='Enter'&&!goBtn.disabled) runSearch();
+  });
+});
+
+function runSearch(){
+  clearSuggestion();
+  var q=document.getElementById('searchInput').value.trim();
+  if(!q) return;
+  if(isAllKeyword(q)){
+    document.getElementById('hintText').style.display='none';
+    document.getElementById('chipsSection').className='chips-section show';
+    document.getElementById('aiResult').className='ai-result';
+    closeTool();return;
+  }
+  var matched=findMatchingTool(q);
+  if(matched){
+    document.getElementById('hintText').style.display='none';
+    document.getElementById('chipsSection').className='chips-section show';
+    document.getElementById('aiResult').className='ai-result';
+    setTimeout(function(){toggleTool(matched.id);},60);return;
+  }
+  var enriched=q;
+  if(q.indexOf('יומן')!==-1) enriched=q+' (Google Calendar)';
+  else if(q.indexOf('מייל')!==-1||q.indexOf('דואר')!==-1) enriched=q+' (Gmail)';
+  else if(q.indexOf('תמונ')!==-1) enriched=q+' (Google Photos)';
+  else if(q.indexOf('וידאו')!==-1||q.indexOf('שיחה')!==-1) enriched=q+' (Google Meet)';
+  else if(q.indexOf('קובץ')!==-1||q.indexOf('מסמך')!==-1) enriched=q+' (Google Drive)';
+  else if(q.indexOf('פתק')!==-1||q.indexOf('תזכורת')!==-1) enriched=q+' (Google Keep)';
+
+  var result=document.getElementById('aiResult'),badge=document.getElementById('aiBadge'),
+      txt=document.getElementById('aiResultText'),copyBtn=document.getElementById('aiResultCopy'),
+      goBtn=document.getElementById('searchGo');
+  goBtn.disabled=true;goBtn.textContent='⏳';
+  copyBtn.className='ai-result-copy';
+  result.className='ai-result show';
+  badge.textContent='✨ מחפש...';
+  txt.innerHTML='<div class="ai-loading"><span></span><span></span><span></span></div>';
+  document.getElementById('hintText').style.display='none';
+  document.getElementById('chipsSection').className='chips-section';
+
+  gtAskAI(enriched,SYS,APP_CONFIG)
+    .then(function(text){
+      badge.textContent='✨ תשובה';txt.textContent=text;
+      copyBtn.className='ai-result-copy show';
+      copyBtn.onclick=function(){navigator.clipboard.writeText(text).then(function(){copyBtn.textContent='✓ הועתק!';setTimeout(function(){copyBtn.textContent='📋 העתק תשובה';},2000);});};
+      result.scrollIntoView({behavior:'smooth',block:'nearest'});
+    })
+    .catch(function(){badge.textContent='⚠️ שגיאה';txt.textContent='לא ניתן להתחבר. בדקו אינטרנט ונסו שוב.';})
+    .finally(function(){goBtn.disabled=false;goBtn.textContent='🔍';});
 }
+
+function clearSearch(){
+  var inp=document.getElementById('searchInput');inp.value='';
+  document.getElementById('searchGo').disabled=true;
+  document.getElementById('searchClear').className='search-clear';
+  document.getElementById('hintText').style.display='block';
+  document.getElementById('chipsSection').className='chips-section';
+  document.getElementById('aiResult').className='ai-result';
+  closeTool();inp.focus();
+}
+
+function toggleTool(id){
+  var panel=document.getElementById('detailPanel');
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+  if(activeTool===id){panel.classList.remove('open');panel.innerHTML='';activeTool=null;return;}
+  activeTool=id;
+  document.getElementById('chip-'+id).classList.add('active');
+  var t=tools.filter(function(x){return x.id===id;})[0];
+  var tab=activeInnerTab[id]||'steps';
+  var sh=t.steps.map(function(s,i){return '<li><span class="step-num">'+(i+1)+'</span><span>'+s+'</span></li>';}).join('');
+  var fh=t.faqs.map(function(f,i){
+    return '<div class="faq-item"><button class="faq-q" onclick="toggleFaq(\''+id+'\','+i+',this)"><span>'+f.q+'</span><span class="faq-arrow">▼</span></button>'+
+           '<div class="faq-a" id="faq-'+id+'-'+i+'">'+f.a+'</div></div>';
+  }).join('');
+  panel.innerHTML=
+    '<div class="panel-header"><span class="panel-icon">'+t.icon+'</span><div><div class="panel-title">'+t.name+'</div><div class="panel-sub">'+t.tagline+'</div></div></div>'+
+    '<div class="what-section"><span class="what-label">🤔 מה זה?</span>'+t.what+'</div>'+
+    '<div class="inner-tabs">'+
+      '<button class="inner-tab '+(tab==='steps'?'active':'')+'" onclick="switchInner(\''+id+'\',\'steps\',this)">📋 שלב אחר שלב</button>'+
+      '<button class="inner-tab '+(tab==='faq'?'active':'')+'"   onclick="switchInner(\''+id+'\',\'faq\',this)">❓ שאלות נפוצות</button>'+
+    '</div>'+
+    '<div class="inner-section '+(tab==='steps'?'active':'')+'" id="inner-steps-'+id+'"><div class="steps-title">איך מתחילים:</div><ol class="steps-list">'+sh+'</ol></div>'+
+    '<div class="inner-section '+(tab==='faq'?'active':'')+'"   id="inner-faq-'+id+'"><div class="faq-list">'+fh+'</div></div>'+
+    '<div class="tip-box"><span class="tip-label">💡 טיפ: </span>'+t.tip+'</div>'+
+    '<a href="'+t.url+'" target="_blank" class="open-btn">פתחו את '+t.name+' עכשיו ←</a>';
+  panel.classList.add('open');
+  setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+}
+
+function closeTool(){
+  var panel=document.getElementById('detailPanel');
+  panel.classList.remove('open');panel.innerHTML='';
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+  activeTool=null;
+}
+
+function switchInner(tid,tab,btn){
+  activeInnerTab[tid]=tab;
+  btn.closest('.inner-tabs').querySelectorAll('.inner-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('inner-steps-'+tid).classList.toggle('active',tab==='steps');
+  document.getElementById('inner-faq-'+tid).classList.toggle('active',tab==='faq');
+}
+
+function toggleFaq(tid,idx,btn){
+  var ans=document.getElementById('faq-'+tid+'-'+idx);
+  var was=ans.classList.contains('open');
+  document.querySelectorAll('[id^="faq-'+tid+'-"]').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-q').forEach(function(q){q.classList.remove('open');});
+  if(!was){ans.classList.add('open');btn.classList.add('open');}
+}
+</script>
+</body>
+</html>
