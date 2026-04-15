@@ -10,7 +10,7 @@ const GT_DEFAULTS = {
   apiUrl: "https://script.google.com/macros/s/AKfycbziw5JD4UTjz4idl45Xwf5EnUuB_NVnI0JUUibOd2XefAFn9kdISJVKkP46_ZirHeez/exec",
   model: "gemini-2.0-flash-lite",
   logoUrl: "https://prevital-eng.github.io/GT-GDSH/logo.png",
-  homeUrl: "https://prevital-eng.github.io/GTA/gimlatech-home.html",
+  homeUrl: "https://prevital-eng.github.io/GTA/",
   whatsapp: "972503960685",
   colors: {
     primary: "#1a5276",
