@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>שם האפליקציה — GimlaTech</title>
+
+  <!-- ===== טוענים את ליבת GimlaTech ===== -->
+  <script src="https://prevital-eng.github.io/gimlatech-core/gimlatech-core.js"></script>
+</head>
+<body>
+
+  <!-- כותרת — מתמלאת אוטומטית על ידי gtInit -->
+  <div id="gt-header" class="gt-header"></div>
+
+  <!-- גוף האפליקציה -->
+  <div class="gt-container">
+
+    <!-- כרטיס קלט -->
+    <div class="gt-card">
+      <label style="font-weight:600; display:block; margin-bottom:8px;">
+        ✍️ מה תרצו לדעת?
+      </label>
+      <textarea id="user-input" class="gt-textarea"
+        placeholder="כתבו את שאלתכם כאן..."></textarea>
+
+      <div style="margin-top:10px; text-align:center;">
+        <button class="gt-btn gt-btn-primary" onclick="handleSubmit()">
+          🔍 קבלו עזרה
+        </button>
+      </div>
+    </div>
+
+    <!-- טעינה -->
+    <div id="gt-loading" class="gt-loading">
+      <span class="gt-spinner"></span> מחפשים תשובה...
+    </div>
+
+    <!-- שגיאה -->
+    <div id="gt-error" class="gt-error"></div>
+
+    <!-- תשובה -->
+    <div id="gt-response"></div>
+
+  </div>
+
+  <!-- פוטר — מתמלא אוטומטית על ידי gtInit -->
+  <div id="gt-footer"></div>
+
+  <script>
+    // ===================================================
+    // הגדרות האפליקציה — כאן משנים בכל אפליקציה חדשה
+    // ===================================================
+    const APP_CONFIG = {
+      appName: "שם האפליקציה",
+      appSubtitle: "תיאור קצר של האפליקציה",
+      // logoUrl: "...",          // ברירת מחדל: לוגו GimlaTech הרגיל
+      // matbLogoUrl: "...",      // יש להסיר הערה כשיתקבל אישור מט"ב
+      // apiUrl: "...",           // ברירת מחדל: proxy ראשי של GimlaTech
+      // model: "gemini-2.0-flash-lite",
+    };
+
+    const SYSTEM_PROMPT = `
+      אתה עוזר דיגיטלי של GimlaTech לגיל השלישי.
+      ענו בעברית בצורה ברורה, פשוטה וידידותית.
+      [הוסיפו כאן את ה-system prompt הספציפי לאפליקציה]
+    `;
+
+    // ===================================================
+    // אתחול — שורה אחת בלבד
+    // ===================================================
+    gtInit(APP_CONFIG);
+
+    // ===================================================
+    // לוגיקה של האפליקציה
+    // ===================================================
+    async function handleSubmit() {
+      const input = document.getElementById("user-input");
+      const question = input.value.trim();
+
+      if (!question) {
+        alert("נא לכתוב שאלה לפני שליחה");
+        return;
+      }
+
+      // מנקים תשובה קודמת
+      document.getElementById("gt-response").innerHTML = "";
+      document.getElementById("gt-error").style.display = "none";
+
+      // מציגים טעינה
+      gtShowLoading("gt-loading", true);
+
+      try {
+        const answer = await gtAskAI(question, SYSTEM_PROMPT, APP_CONFIG);
+        gtShowResponse("gt-response", answer);
+      } catch (err) {
+        gtShowError("gt-error", "אירעה שגיאה בקבלת התשובה. נסו שוב.");
+        console.error(err);
+      } finally {
+        gtShowLoading("gt-loading", false);
+      }
+    }
+
+    // שליחה עם Enter (Shift+Enter = שורה חדשה)
+    document.getElementById("user-input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    });
+  </script>
+
+</body>
+</html>
