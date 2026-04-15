@@ -10,7 +10,7 @@ const GT_DEFAULTS = {
   apiUrl: "https://script.google.com/macros/s/AKfycbziw5JD4UTjz4idl45Xwf5EnUuB_NVnI0JUUibOd2XefAFn9kdISJVKkP46_ZirHeez/exec",
   model: "gemini-2.0-flash-lite",
   logoUrl: "https://prevital-eng.github.io/GT-GDSH/logo.png",
-  matbLogoUrl: "", // יש להגדיר כשיתקבל אישור
+  homeUrl: "https://prevital-eng.github.io/GTDH/gimlatech-home.html",
   whatsapp: "972503960685",
   colors: {
     primary: "#1a5276",
@@ -290,7 +290,10 @@ function gtRenderHeader(config) {
     ? `<img src="${config.matbLogoUrl}" alt="מט&quot;ב" class="gt-matb-logo" style="display:block">`
     : `<img src="" alt="מט&quot;ב" class="gt-matb-logo">`; // מוסתר
 
+  const homeUrl = config.homeUrl || GT_DEFAULTS.homeUrl;
+
   header.innerHTML = `
+    <a href="${homeUrl}" style="position:absolute;top:14px;right:16px;font-size:11px;color:rgba(255,255,255,0.7);font-weight:600;text-decoration:none;">🏠 דף הבית</a>
     <div class="gt-header-logos">
       <img src="${config.logoUrl || GT_DEFAULTS.logoUrl}" alt="GimlaTech" class="gt-logo">
       ${matbLogoHtml}
@@ -338,11 +341,17 @@ async function gtAskAI(userMessage, systemPrompt, config) {
   const data = await response.json();
 
   // תמיכה במבנים שונים של תשובה
+  // Claude API (Anthropic proxy)
+  if (data.content && Array.isArray(data.content) && data.content[0]?.text) {
+    return data.content[0].text;
+  }
+  // Gemini
   if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
     return data.candidates[0].content.parts[0].text;
   }
   if (data.reply) return data.reply;
   if (data.text) return data.text;
+  if (data.error) throw new Error(data.error.message || 'שגיאת שרת');
 
   throw new Error("לא התקבלה תשובה מהשרת");
 }
