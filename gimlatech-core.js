@@ -51,6 +51,16 @@ function gtInjectStyles() {
       min-height: 100vh;
     }
 
+    /* עיצוב כהה — מופעל כשהאפליקציה מגדירה darkTheme: true */
+    body.gt-dark {
+      background: #0f172a;
+      color: #f1f5f9;
+      --bg:#0f172a; --surface:#1e293b; --surface2:#273549;
+      --accent:#38bdf8; --accent2:#818cf8;
+      --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+      --wa:#25d366; --yellow:#fbbf24;
+    }
+
     /* ===== כותרת ===== */
     .gt-header {
       background: var(--gt-primary);
@@ -314,8 +324,8 @@ async function gtAskAI(userMessage, systemPrompt, config) {
   const model = config.model || GT_DEFAULTS.model;
 
   const params = new URLSearchParams({
-    userMessage: userMessage,
-    systemPrompt: systemPrompt,
+    question: userMessage,
+    system: systemPrompt,
     model: model
   });
 
@@ -391,6 +401,7 @@ function gtShowError(errorId, message) {
 // ===== אתחול אפליקציה =====
 function gtInit(config) {
   gtInjectStyles();
+  if (config.darkTheme) document.body.classList.add('gt-dark');
   gtRenderHeader(config);
   gtRenderFooter(config);
 }
